@@ -1,0 +1,158 @@
+---
+title: 'Lunatics, Werewolves & Murderers in Chicago:'
+author: "Marcus C. Rodriguez"
+date: "2024-01-01"
+output:
+  html_document: default
+  pdf_document: default
+subtitle: A Case Study
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+install.packages("tidyverse")
+library (tidyverse)
+```
+
+>“The very emphasis of the commandment: Thou shalt not kill, makes it certain that we are descended from an endlessly long chain of generations of murderers, whose love of murder was in their blood as it is perhaps also in ours.” Sigmund Freud, 1912
+
+**Lunatic** - A person who is perceived as being mentally ill, dangerous, foolish or crazy, displaying characteristics of “lunacy”. 
+
+**Werewolf** - A man who upon the full phase of the moon transforms into a mythological wolf-like creature which is commonly found in European folklore. 
+
+**Murderer** - One who engages in the unlawful act of killing a human being.
+
+### Introduction
+
+  What possibly could lunatics, werewolves and murderers have in common? The word “lunatic” is derived from the Latin “lunaticus” which refers to epilepsy or other forms of madness believed to be caused by the full moon. (Tremolizzo et al., 2011) Such beliefs of the moon influencing behavior and disease was commonplace until the 17th century. (Iosif & Ballon, 2005) It was believed that the phase of a  full moon could transform a sane man into a madman, so too could it  turn a man into a wolf, perhaps the origins of the more recent lunar lycanthropy association.  The werewolf provides an interesting psychological basis to examine the final element of the case study, the murderer. A werewolf could be perceived as a cyclical metaphor for Freud’s dual drive theory. Man is subjected to the whims of nature, (i.e. changes in the phases of the moon) and transforms into a wolf-man whose unrestrained libidinal drive is unchecked upon losing control of his higher faculties and  giving way to his bestial nature as personified by the predator wolf -the death drive. Enter the murderer.  
+  
+It’s a clear fall evening in Chicago, as a patrol car comes to a stop at a traffic light, the full moon reflects off the lake onto the windshield. A police radio can be heard, “Dispatch, all units, we have another one, shots fired 100 block of South Wacker. Is there anyone left to respond? Anyone? It must be a full moon again!” This case study will examine the effect that the final or full phase of the moon has on human behavior, specifically the correlation with murders in the City of Chicago. Based on its findings, this case study will make recommendations as it relates to any increased staffing needs during the final phase of the moon in conjunction with allocating emergency response resources efficiently.
+
+### 1.(A)sk    
+
+* Is public data available that provides information on the date and time of homicides in Chicago as well as the lunar phase? 
+
+* Is there a positive correlation between the number of homicides in the City of Chicago and a full moon?
+
+* How can emergency responders use this information to enhance situational awareness and make staffing allocations consistent with the findings of this case study? 
+
+### 2.(P)repare
+  
+The following data sets in the public domain were utilized for this case study:
+
+TABLE ID / LINK                       | DESCRIPTION            |    SIZE              
+------------------------------------- | ------------------------ | ---------------------
+Bigquery-public-data.chicago_crime.crime | Chicago crime dataset        | 2.92 GB  |
+[https://data.cityofchicago.org](https://data.cityofchicago.org) | City of Chicago |
+|                                      | 2001 - 2023 |       |
+|                          |                 |   
+Bigquery-public-data.moon_phases.moon_phases | Phases of the moon	|     85.58 KB   |              
+[http://aa.usno.navy.mil/data/docs/MoonPhase.php](http://aa.usno.navy.mil/data/docs/MoonPhase.php) | U.S. Navy |
+
+### 3.(P)rocess  
+  
+Data Cleaning & Wrangling  
+
+**Google Sheets**  
+  
+  
+* Imported CSV files to spreadsheet homicides_chicago, full_moon_lookup_table  
+
+* Checked duplicates/nulls, parsed data types, split date/time columns (both sheets)  
+
+* Added full_moon column (E, Boolean) to calculate if there was a full moon corresponding to the date of a murder. =IF(COUNTIF(full,A2)>0,"Yes","No")  
+
+* Added total_murder_count (F) and full_moon_murder_count (G) =if(E2="Yes",1,0)  
+
+* Imported homicides_year_change.csv, sheet from SQL  
+
+* Added percent_full_moon (E) column to sheet homicides_year_chicago, =C2/B2  
+
+**SQL**  
+
+* Import combined, cleaned CSV file to create a summary homicides_year_change.csv  
+
+***  
+    SELECT  
+      EXTRACT(YEAR FROM date) AS YEAR,  
+      COUNT(date) AS total_homicides,  
+      SUM(CAST(full_moon AS INT64)) AS full_moon_murders
+    FROM `lunatic-409713.homicides_data.homicides_chicago_full_moon'  
+    GROUP BY  
+      YEAR; 
+    
+                             
+**R**  
+  
+* Import, summary file (homicides_years_chiacgo.csv) to create visualization and perform analysis
+
+### 4.(A)nalyze  
+  
+Perform descriptive analysis to facilitate data driven decision making.  
+  
+**Google Sheets**  
+  
+  
+* Calculated an average of 3.22% (=AVERAGE(E2:E24)) of murders occurring during a full moon over the period of 2001 to 2023 in the city of Chicago. Based on a synodic lunar month of 29.531 days the average percentage of full moon murders expected is 3.39%.  The mean of 3.22% calculated over the twenty-two year period is less than the expected average of 3.39%, indicating that the full moon does not lead to any extraordinary increase in the number of homicides.  
+
+* Calculated the standard deviation (=STDEV(E2:E4)) of the percentage of full moon murders which is 0.00748, indicating a low dispersion of values about the mean.  
+
+* Calculated a 95% confidence interval, Alpha = 0.05 (3.54% / 2.91%) =CONFIDENCE(C29,F25,22)  
+
+* Visualizations:  
+![](/cloud/project/chicago_murders_2001_2023.png) 
+![](/cloud/project/chicago_murders_percentage_2001_2023.png)
+
+**R** 
+  
+Calculate the average percentage and related summarry statistics of murders occurring during a full moon over the period of 2001 to 2023 in the city of Chicago:
+```{r df, echo=TRUE}
+df <- read_csv("homicides_year_chicago.csv", show_col_types = FALSE)
+sample <- nrow(df)
+mean_percent <- mean(df$percent)
+stdev <- sd(df[["percent"]])
+margin_error <- qt(0.975,22)* stdev/sqrt(22)
+lower_interval <- mean_percent - margin_error
+upper_interval <- mean_percent + margin_error
+print(paste0("Sample Size: ",sample))
+print(paste0("Mean: ",round(mean_percent,4)*100, "%"))
+print(paste0("Standard Deviation: ",round(stdev,4)))
+print(paste0("Margin of Error: ",round(margin_error,4)))
+print(paste0("95% Confidence Interval: ",round(lower_interval*100,2), "% / ", round(upper_interval*100,2), "%"))
+
+```
+```{r pressure, echo=TRUE}
+df <- read_csv("homicides_year_chicago.csv", show_col_types = FALSE)
+p <- ggplot(df, aes(x = year, y = total_homicides))+
+  geom_col(aes(fill = full_moon_murders), width = 0.80)+
+  geom_text(aes(label = full_moon_murders), vjust = 2, colour = "white")+
+  labs(title = "Chicago Murders 2001 - 2023",
+     fill = "During Full Moon",
+     caption = "Data source: City of Chicago",
+     x = "Year", y = "# Homicides")
+p
+
+```
+
+### 5.(S)hare  
+
+  After analyzing the data, R Markdown language was used to create this presentation that is shared on [git@github.com:marcuscrodriguez/marcusc.git](https://github.com/marcuscrodriguez/marcusc.git) and on my personal website [www.marcusc.com](https://www.marcusc.com). 
+  
+  *Based on the analysis of data covering twenty-two years, there are no increases in homicides that may be attributed to the full phase of the moon.  
+  
+### 6.(A)ct  
+  
+  *Based on the shared analysis, no action is necessary as it relates to staffing and emergency personnel requirements during a full moon as it does not impact the number of homicides.  
+   
+  *Given the high number of annual homicides, additional studies and resources should be expended to explore the potential root causes of the high murder rates, including but not limited to socioeconomic, psychological, criminal justice factors as well as local gun legislation.   
+
+### References  
+  
+Freud, Sigmund (1918). Reflections on war and death. A. A. Brill & Alfred B. Kuttner (Eds.).
+
+
+Riva, M., Tremolizzo, L., Spicci, M., Ferrarese, C., De Vito, G., Cesana, G., & Sironi, V.A. (2011). The Disease of the Moon: The Linguistic and Pathological Evolution of the English Term “Lunatic”. Journal of the History of the Neurosciences, 20, 65 - 73.
+
+Iosif, A., & Ballon, B. (2005). Bad Moon Rising: the persistent belief in lunar connections to madness. CMAJ : Canadian Medical Association journal, 173(12), 1498–1500. https://doi.org/10.1503/cmaj.051119
+
+  
