@@ -515,7 +515,7 @@ making.</p>
 occurring during a full moon over the period of 2001 to 2023 in the city
 of Chicago. Based on a synodic lunar month of 29.531 days the average
 percentage of full moon murders expected is 3.39%. The mean of 3.22%
-calculated over the twenty-two year period is less than the expected
+calculated over the twenty-three year period is less than the expected
 average of 3.39%, indicating that the full moon does not lead to any
 extraordinary increase in the number of homicides.</p></li>
 <li><p>Calculated the standard deviation (=STDEV(E2:E4)) of the
@@ -534,7 +534,7 @@ the city of Chicago:</p>
 sample &lt;- nrow(df)
 mean_percent &lt;- mean(df$percent)
 stdev &lt;- sd(df[[&quot;percent&quot;]])
-margin_error &lt;- qt(0.975,22)* stdev/sqrt(22)
+margin_error &lt;- round((qt(0.975,22)* stdev/sqrt(23)),4)
 lower_interval &lt;- mean_percent - margin_error
 upper_interval &lt;- mean_percent + margin_error
 print(paste0(&quot;Sample Size: &quot;,sample))</code></pre>
@@ -544,9 +544,9 @@ print(paste0(&quot;Sample Size: &quot;,sample))</code></pre>
 <pre class="r"><code>print(paste0(&quot;Standard Deviation: &quot;,round(stdev,4)))</code></pre>
 <pre><code>## [1] &quot;Standard Deviation: 0.0075&quot;</code></pre>
 <pre class="r"><code>print(paste0(&quot;Margin of Error: &quot;,round(margin_error,4)))</code></pre>
-<pre><code>## [1] &quot;Margin of Error: 0.0033&quot;</code></pre>
+<pre><code>## [1] &quot;Margin of Error: 0.0032&quot;</code></pre>
 <pre class="r"><code>print(paste0(&quot;95% Confidence Interval: &quot;,round(lower_interval*100,2), &quot;% / &quot;, round(upper_interval*100,2), &quot;%&quot;))</code></pre>
-<pre><code>## [1] &quot;95% Confidence Interval: 2.89% / 3.55%&quot;</code></pre>
+<pre><code>## [1] &quot;95% Confidence Interval: 2.9% / 3.54%&quot;</code></pre>
 <pre class="r"><code>df &lt;- read_csv(&quot;homicides_year_chicago.csv&quot;, show_col_types = FALSE)
 p &lt;- ggplot(df, aes(x = year, y = total_homicides))+
   geom_col(aes(fill = full_moon_murders), width = 0.80)+
@@ -561,15 +561,15 @@ p</code></pre>
 <div id="share" class="section level3">
 <h3>5.(S)hare</h3>
 <p>After analyzing the data, R Markdown language was used to create this
-presentation that is shared on <a href="https://marcuscrodriguez.github.io/marcusc.github.io/">https://marcuscrodriguez.github.io/marcusc.github.io/</a>
+presentation that is shared on <a href="https://github.com/marcuscrodriguez/marcusc.git">git@github.com:marcuscrodriguez/marcusc.git</a>
 and on my personal website <a href="https://www.marcusc.com">www.marcusc.com</a>.</p>
-<p>*Based on the analysis of data covering twenty-two years, there are
+<p>*Based on the analysis of data covering twenty-three years, there are
 no increases in homicides that may be attributed to the full phase of
 the moon.</p>
 </div>
 <div id="act" class="section level3">
 <h3>6.(A)ct</h3>
-<p>*Based on the shared analysis, no action is necessary as it relates
+<p>*Based on the shared analysis, action is not necessary as it relates
 to staffing and emergency personnel requirements during a full moon as
 it does not impact the number of homicides.</p>
 <p>*Given the high number of annual homicides, additional studies and
